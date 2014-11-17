@@ -285,7 +285,7 @@ class AuditableBehavior extends ModelBehavior
 	 */
 	protected function takeSnapshot(Model $Model)
 	{
-		$id = $Model->id;
+		$id = (is_array($Model->id)) ? current($Model->id) : $Model->id;
 
 		if (isset($Model->data[$Model->alias][$Model->primaryKey]) && !empty($Model->data[$Model->alias][$Model->primaryKey])) {
 			$id = $Model->data[$Model->alias][$Model->primaryKey];
@@ -325,12 +325,14 @@ class AuditableBehavior extends ModelBehavior
 		$encoded = $this->buildEncodedMessage($action, $diff);
 
 		$statement = $this->getQuery($Model, $action);
+		
+		$id = (is_array($Model->id)) ? current($Model->id) : $Model->id;
 
 		$toSave = array(
 			'Logger' => array(
 				'responsible_id' => $this->activeResponsibleId ?: 0,
 				'model_alias' => $Model->alias,
-				'model_id' => $Model->id,
+				'model_id' => $id,
 				'type' => $this->typesEnum[$action] ?: 0,
 			),
 			'LogDetail' => array(
